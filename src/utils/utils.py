@@ -13,6 +13,7 @@ from langchain_openai import AzureChatOpenAI, ChatOpenAI
 import gradio as gr
 
 from .llm import DeepSeekR1ChatOpenAI, DeepSeekR1ChatOllama
+from .groq import GroqChatOpenAI
 
 PROVIDER_DISPLAY_NAMES = {
     "openai": "OpenAI",
@@ -21,7 +22,8 @@ PROVIDER_DISPLAY_NAMES = {
     "deepseek": "DeepSeek",
     "google": "Google",
     "alibaba": "Alibaba",
-    "moonshot": "MoonShot"
+    "moonshot": "MoonShot",
+    "groq": "Groq"
 }
 
 def get_llm_model(provider: str, **kwargs):
@@ -150,13 +152,29 @@ def get_llm_model(provider: str, **kwargs):
             base_url=base_url,
             api_key=api_key,
         )
-
     elif provider == "moonshot":
         return ChatOpenAI(
             model=kwargs.get("model_name", "moonshot-v1-32k-vision-preview"),
             temperature=kwargs.get("temperature", 0.0),
             base_url=os.getenv("MOONSHOT_ENDPOINT"),
             api_key=os.getenv("MOONSHOT_API_KEY"),
+        )
+    elif provider == "groq":
+        if not kwargs.get("base_url", ""):
+            base_url = os.getenv("GROQ_ENDPOINT", "https://api.groq.com/openai/v1")
+        else:
+            base_url = kwargs.get("base_url")
+
+        # Determine context size based on model
+        model_name = kwargs.get("model_name", "llama3-8b-8192")
+        
+        # Use the GroqChatOpenAI wrapper
+        return GroqChatOpenAI(
+            model=model_name,
+            temperature=kwargs.get("temperature", 0.0),
+            base_url=base_url,
+            api_key=api_key,
+            max_tokens=kwargs.get("num_ctx", 7000)  # Pass the token limit to the model
         )
     else:
         raise ValueError(f"Unsupported provider: {provider}")
@@ -172,6 +190,7 @@ model_names = {
     "mistral": ["pixtral-large-latest", "mistral-large-latest", "mistral-small-latest", "ministral-8b-latest"],
     "alibaba": ["qwen-plus", "qwen-max", "qwen-turbo", "qwen-long"],
     "moonshot": ["moonshot-v1-32k-vision-preview", "moonshot-v1-8k-vision-preview"],
+    "groq": ["llama3-8b-8192", "llama3-70b-8192", "mixtral-8x7b-32768", "gemma-7b-it"]
 }
 
 # Callback to update the model name dropdown based on the selected provider

@@ -41,6 +41,7 @@ def get_env_value(key, provider):
         "mistral": {"api_key": "MISTRAL_API_KEY", "base_url": "MISTRAL_ENDPOINT"},
         "alibaba": {"api_key": "ALIBABA_API_KEY", "base_url": "ALIBABA_ENDPOINT"},
         "moonshot":{"api_key": "MOONSHOT_API_KEY", "base_url": "MOONSHOT_ENDPOINT"},
+        "groq": {"api_key": "GROQ_API_KEY", "base_url": "GROQ_ENDPOINT"},
     }
 
     if provider in env_mappings and key in env_mappings[provider]:
@@ -125,6 +126,10 @@ def test_mistral_model():
 def test_moonshot_model():
     config = LLMConfig(provider="moonshot", model_name="moonshot-v1-32k-vision-preview")
     test_llm(config, "Describe this image", "assets/examples/test.png")
+
+def test_groq_model():
+    config = LLMConfig(provider="groq", model_name="llama3-8b-8192")
+    test_llm(config, "Explain what makes Llama 3 different from previous versions.")
 
 if __name__ == "__main__":
     # test_openai_model()

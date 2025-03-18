@@ -824,7 +824,7 @@ def create_ui(config, theme_name="Ocean"):
 
             # Change event to update context length slider
             def update_llm_num_ctx_visibility(llm_provider):
-                return gr.update(visible=llm_provider == "ollama")
+                return gr.update(visible=llm_provider in ["ollama", "groq"])
 
             # Bind the change event of llm_provider to update the visibility of context length slider
             llm_provider.change(
